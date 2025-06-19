@@ -150,7 +150,7 @@ celluloid_shortcuts_window_init(CelluloidShortcutsWindow *wnd)
             
     const ShortcutEntry playlist[]
         = { 
-            {"Page_Up  /  Page_Down", _("Play next / previous file")},
+            {"Page_Down  /  Page_Up", _("Play next / previous file")},
             {"Down_arrow  /  Up_arrow", _("Select next / previous file")},
             {"Enter", _("Play selected file")},
             {"Ctrl+F", _("Enter search mode")},

@@ -1610,7 +1610,7 @@ celluloid_view_show_about_dialog(CelluloidView *view)
                 ICON_NAME,
                 "version",
                 //VERSION,
-                "0.21/7 fork by MD",
+                "0.21/8 fork by MD",
                 "comments",
                 _("A GTK frontend for MPV"),
                 "website",

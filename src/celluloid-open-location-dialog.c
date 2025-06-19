@@ -23,208 +23,220 @@
 #include "celluloid-open-location-dialog.h"
 #include "celluloid-main-window.h"
 
+
 struct _CelluloidOpenLocationDialog
 {
-	GtkDialog parent_instance;
-	GtkWidget *content_area;
-	GtkWidget *content_box;
-	GtkWidget *loc_label;
-	GtkWidget *loc_entry;
+    GtkDialog parent_instance;
+    GtkWidget *content_area;
+    GtkWidget *content_box;
+    GtkWidget *loc_label;
+    GtkWidget *loc_entry;
 };
+
 
 struct _CelluloidOpenLocationDialogClass
 {
-	GtkDialogClass parent_class;
+    GtkDialogClass parent_class;
 };
 
+
 G_DEFINE_TYPE(CelluloidOpenLocationDialog, celluloid_open_location_dialog, GTK_TYPE_DIALOG)
+
 
 static gboolean
 key_press_handler (GtkWidget *widget, GdkEventKey *event)
 {
-	guint keyval = event->keyval;
-	guint state = event->state;
+    guint keyval = event->keyval;
+    guint state = event->state;
 
-	const guint mod_mask =	GDK_MODIFIER_MASK
-				&~(GDK_SHIFT_MASK
-				|GDK_LOCK_MASK
-				|GDK_MOD2_MASK
-				|GDK_MOD3_MASK
-				|GDK_MOD4_MASK
-				|GDK_MOD5_MASK);
+    const guint mod_mask =  GDK_MODIFIER_MASK
+                &~(GDK_SHIFT_MASK
+                |GDK_LOCK_MASK
+                |GDK_MOD2_MASK
+                |GDK_MOD3_MASK
+                |GDK_MOD4_MASK
+                |GDK_MOD5_MASK);
 
-	if((state&mod_mask) == 0 && keyval == GDK_KEY_Return)
-	{
-		gtk_dialog_response(GTK_DIALOG(widget), GTK_RESPONSE_ACCEPT);
-	}
+    if((state&mod_mask) == 0 && keyval == GDK_KEY_Return)
+    {
+        gtk_dialog_response(GTK_DIALOG(widget), GTK_RESPONSE_ACCEPT);
+    }
 
-	return	GTK_WIDGET_CLASS(celluloid_open_location_dialog_parent_class)
-		->key_press_event (widget, event);
+    return  GTK_WIDGET_CLASS(celluloid_open_location_dialog_parent_class)
+        ->key_press_event (widget, event);
 }
+
 
 static GtkClipboard *
 get_clipboard(CelluloidOpenLocationDialog *dlg)
 {
-	const gchar *const clipboard_names[] = {"CLIPBOARD", "PRIMARY", NULL};
-	GtkClipboard *clipboard = NULL;
+    const gchar *const clipboard_names[] = {"CLIPBOARD", "PRIMARY", NULL};
+    GtkClipboard *clipboard = NULL;
 
-	for(gint i = 0; clipboard_names[i] && !clipboard; i++)
-	{
-		GdkAtom atom = gdk_atom_intern(clipboard_names[i], FALSE);
+    for(gint i = 0; clipboard_names[i] && !clipboard; i++)
+    {
+        GdkAtom atom = gdk_atom_intern(clipboard_names[i], FALSE);
 
-		clipboard = gtk_clipboard_get(atom);
+        clipboard = gtk_clipboard_get(atom);
 
-		if(!gtk_clipboard_wait_is_text_available(clipboard))
-		{
-			clipboard = NULL;
-		}
-	}
+        if(!gtk_clipboard_wait_is_text_available(clipboard))
+        {
+            clipboard = NULL;
+        }
+    }
 
-	return clipboard;
+    return clipboard;
 }
+
 
 static void
-clipboard_text_received_handler(	GtkClipboard *clipboard,
-					const gchar *text,
-					gpointer data )
+clipboard_text_received_handler(    GtkClipboard *clipboard,
+                    const gchar *text,
+                    gpointer data )
 {
-	CelluloidOpenLocationDialog *dlg = data;
+    CelluloidOpenLocationDialog *dlg = data;
 
-	if(text && *text && (g_path_is_absolute(text) || strstr(text, "://") != NULL))
-	{
-		gtk_entry_set_text(GTK_ENTRY(dlg->loc_entry), text);
-		gtk_editable_select_region(GTK_EDITABLE(dlg->loc_entry), 0, -1);
-	}
+    if(text && *text && (g_path_is_absolute(text) || strstr(text, "://") != NULL))
+    {
+        gtk_entry_set_text(GTK_ENTRY(dlg->loc_entry), text);
+        gtk_editable_select_region(GTK_EDITABLE(dlg->loc_entry), 0, -1);
+    }
 
-	g_object_unref(dlg);
+    g_object_unref(dlg);
 }
+
 
 static void
 load_text_from_clipboard(CelluloidOpenLocationDialog *dlg)
 {
-	g_object_ref(dlg);
+    g_object_ref(dlg);
 
-	gtk_clipboard_request_text(	get_clipboard(dlg),
-					clipboard_text_received_handler,
-					dlg );
+    gtk_clipboard_request_text( get_clipboard(dlg),
+                    clipboard_text_received_handler,
+                    dlg );
 }
+
 
 static void
 celluloid_open_location_dialog_class_init(CelluloidOpenLocationDialogClass *klass)
 {
-	GtkWidgetClass *wid_class = GTK_WIDGET_CLASS(klass);
+    GtkWidgetClass *wid_class = GTK_WIDGET_CLASS(klass);
 
-	wid_class->key_press_event = key_press_handler;
+    wid_class->key_press_event = key_press_handler;
 }
+
 
 static void
 celluloid_open_location_dialog_init(CelluloidOpenLocationDialog *dlg)
 {
-	GdkGeometry geom;
-	gboolean use_header_bar = TRUE;
+    GdkGeometry geom;
+    gboolean use_header_bar = TRUE;
 
-	geom.max_width = G_MAXINT;
-	geom.max_height = 0;
-	dlg->content_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-	dlg->content_area = gtk_dialog_get_content_area(GTK_DIALOG(dlg));
-	dlg->loc_label = gtk_label_new(_("Location:"));
-	dlg->loc_entry = gtk_entry_new();
+    geom.max_width = G_MAXINT;
+    geom.max_height = 0;
+    dlg->content_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    dlg->content_area = gtk_dialog_get_content_area(GTK_DIALOG(dlg));
+    dlg->loc_label = gtk_label_new(_("Location:"));
+    dlg->loc_entry = gtk_entry_new();
 
-	g_object_get(G_OBJECT(dlg), "use-header-bar", &use_header_bar, NULL);
+    g_object_get(G_OBJECT(dlg), "use-header-bar", &use_header_bar, NULL);
 
-	gtk_dialog_add_buttons(	GTK_DIALOG(dlg),
-				_("_Cancel"),
-				GTK_RESPONSE_REJECT,
-				_("_Open"),
-				GTK_RESPONSE_ACCEPT,
-				NULL );
+    gtk_dialog_add_buttons( GTK_DIALOG(dlg),
+                _("_Cancel"),
+                GTK_RESPONSE_REJECT,
+                _("_Open"),
+                GTK_RESPONSE_ACCEPT,
+                NULL );
 
-	gtk_window_set_geometry_hints(	GTK_WINDOW(dlg),
-					GTK_WIDGET(dlg),
-					&geom,
-					GDK_HINT_MAX_SIZE );
+    gtk_window_set_geometry_hints(  GTK_WINDOW(dlg),
+                    GTK_WIDGET(dlg),
+                    &geom,
+                    GDK_HINT_MAX_SIZE );
 
-	gtk_window_set_modal(GTK_WINDOW(dlg), 1);
-	gtk_container_set_border_width(GTK_CONTAINER(dlg->content_area), 12);
+    gtk_window_set_modal(GTK_WINDOW(dlg), 1);
+    gtk_container_set_border_width(GTK_CONTAINER(dlg->content_area), 12);
 
-	if(use_header_bar)
-	{
-		gtk_widget_set_margin_bottom(dlg->content_box, 12);
-	}
+    if (use_header_bar)
+    {
+        gtk_widget_set_margin_bottom(dlg->content_box, 12);
+    }
 
-	gtk_window_set_geometry_hints(	GTK_WINDOW(dlg),
-					GTK_WIDGET(dlg),
-					&geom,
-					GDK_HINT_MAX_SIZE );
+    gtk_window_set_geometry_hints(  GTK_WINDOW(dlg),
+                    GTK_WIDGET(dlg),
+                    &geom,
+                    GDK_HINT_MAX_SIZE );
 
-	gtk_container_add(GTK_CONTAINER(dlg->content_area), dlg->content_box);
+    gtk_container_add(GTK_CONTAINER(dlg->content_area), dlg->content_box);
 
-	gtk_box_pack_start(	GTK_BOX(dlg->content_box),
-				dlg->loc_label,
-				FALSE,
-				FALSE,
-				0 );
+    gtk_box_pack_start( GTK_BOX(dlg->content_box),
+                dlg->loc_label,
+                FALSE,
+                FALSE,
+                0 );
 
-	gtk_box_pack_start(	GTK_BOX(dlg->content_box),
-				dlg->loc_entry,
-				TRUE,
-				TRUE,
-				0 );
+    gtk_box_pack_start( GTK_BOX(dlg->content_box),
+                dlg->loc_entry,
+                TRUE,
+                TRUE,
+                0 );
 
-	gtk_window_set_default_size(GTK_WINDOW(dlg), 350, -1);
-	gtk_dialog_set_default_response (GTK_DIALOG(dlg), GTK_RESPONSE_ACCEPT);
+    gtk_window_set_default_size(GTK_WINDOW(dlg), 350, -1);
+    gtk_dialog_set_default_response (GTK_DIALOG(dlg), GTK_RESPONSE_ACCEPT);
 }
+
 
 GtkWidget *
 celluloid_open_location_dialog_new(GtkWindow *parent, const gchar *title)
 {
-	GtkWidget *dlg;
-	GtkWidget *header_bar;
-	gboolean csd_enabled;
+    GtkWidget *dlg;
+    GtkWidget *header_bar;
+    gboolean csd_enabled;
 
-	csd_enabled =	celluloid_main_window_get_csd_enabled
-			(CELLULOID_MAIN_WINDOW(parent));
+    //csd_enabled = celluloid_main_window_get_csd_enabled(CELLULOID_MAIN_WINDOW(parent));
+    csd_enabled = FALSE;
 
-	dlg = g_object_new(	celluloid_open_location_dialog_get_type(),
-				"use-header-bar", csd_enabled,
-				"title", title,
-				NULL );
+    dlg = g_object_new( celluloid_open_location_dialog_get_type(),
+                "use-header-bar", csd_enabled,
+                "title", title,
+                NULL );
 
-	header_bar = gtk_dialog_get_header_bar(GTK_DIALOG(dlg));
+    header_bar = gtk_dialog_get_header_bar(GTK_DIALOG(dlg));
 
-	if(header_bar)
-	{
-		GtkWidget *cancel_btn = gtk_dialog_get_widget_for_response
-					(GTK_DIALOG(dlg), GTK_RESPONSE_REJECT);
+    if (header_bar)
+    {
+        GtkWidget *cancel_btn = gtk_dialog_get_widget_for_response
+                    (GTK_DIALOG(dlg), GTK_RESPONSE_REJECT);
 
-		gtk_container_child_set(	GTK_CONTAINER(header_bar),
-						cancel_btn,
-						"pack-type",
-						GTK_PACK_START,
-						NULL );
+        gtk_container_child_set(    GTK_CONTAINER(header_bar),
+                        cancel_btn,
+                        "pack-type",
+                        GTK_PACK_START,
+                        NULL );
 
-		gtk_header_bar_set_show_close_button
-			(GTK_HEADER_BAR(header_bar), FALSE);
+        gtk_header_bar_set_show_close_button
+            (GTK_HEADER_BAR(header_bar), FALSE);
 
-	}
+    }
 
-	load_text_from_clipboard(CELLULOID_OPEN_LOCATION_DIALOG(dlg));
+    load_text_from_clipboard(CELLULOID_OPEN_LOCATION_DIALOG(dlg));
 
-	gtk_widget_hide_on_delete(dlg);
-	gtk_window_set_transient_for(GTK_WINDOW(dlg), parent);
-	gtk_widget_show_all(dlg);
+    gtk_widget_hide_on_delete(dlg);
+    gtk_window_set_transient_for(GTK_WINDOW(dlg), parent);
+    gtk_widget_show_all(dlg);
 
-	return dlg;
+    return dlg;
 }
+
 
 const gchar *
 celluloid_open_location_dialog_get_string(CelluloidOpenLocationDialog *dlg)
 {
-	return gtk_entry_get_text(GTK_ENTRY(dlg->loc_entry));
+    return gtk_entry_get_text(GTK_ENTRY(dlg->loc_entry));
 }
+
 
 guint64
 celluloid_open_location_dialog_get_string_length(CelluloidOpenLocationDialog *dlg)
 {
-	return gtk_entry_get_text_length(GTK_ENTRY(dlg->loc_entry));
+    return gtk_entry_get_text_length(GTK_ENTRY(dlg->loc_entry));
 }
