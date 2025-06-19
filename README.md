@@ -1,6 +1,6 @@
 Celluloid-MD
 
-Fork of the Celluloid 0.21. https://github.com/celluloid-player/celluloid \
+Fork of the Celluloid 0.21 (Last GTK 3 version). https://github.com/celluloid-player/celluloid \
 Some design changes. Sorts files when opening a folder. More playlist control. Some shortcuts changed.
 
 <br>
